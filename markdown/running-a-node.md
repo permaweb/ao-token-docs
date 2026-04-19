@@ -108,7 +108,7 @@ Replace
 
 2. Run the server
 
-Use the same `run` command specified in the [ Run the HyperBEAM Server](#run-the-hyperbeam-server) section with the configuration specified.
+Use the same `run` command specified in the [Run the HyperBEAM Server](#run-the-hyperbeam-server) section with the configuration specified.
 
 ```bash
 HB_CONFIG=config.json rebar3 as genesis_wasm shell

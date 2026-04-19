@@ -2,7 +2,7 @@
 
 This documentation outlines the neccessary steps for integrating with the [AO](https://ao.arweave.net/) Token. It includes technical steps for sending transfers, performing lookups, and verification.
 
-There are two AO Mainnet URLs are referenced throughout this document for compute and indexing of the AO token process. To run your own node that can both evaluate and index the token, see [Running A Node](./running-a-node). Note while two different nodes are used here, both compute and indexing can run on the same node.
+There are two AO Mainnet URLs are referenced throughout this document for compute and indexing of the AO token process. To run your own node that can both evaluate and index the token, see [Running A Node](./running-a-node.md). Note while two different nodes are used here, both compute and indexing can run on the same node.
 
 The nodes used in this documentation are:
 

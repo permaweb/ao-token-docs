@@ -2,7 +2,7 @@
 
 You can verify that an AO message is permanently stored on Arweave by making specific HTTP requests to an indexer node. These requests confirm both the existence of the data and its exact location within the weave.
 
-The indexer node used in these examples is [https://arweave.net](https://arweave.net). To run your own node as an indexer, see the [indexer](./running-a-node#run-hyperbeam-as-an-indexer) section in [Running A Node](./running-a-node).
+The indexer node used in these examples is [https://arweave.net](https://arweave.net). To run your own node as an indexer, see the [indexer](./running-a-node.md#run-hyperbeam-as-an-indexer) section in [Running A Node](./running-a-node.md).
 
 **Key Points**
 
