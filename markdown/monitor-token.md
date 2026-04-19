@@ -86,7 +86,7 @@ GET https://state.forward.computer/0syT13r0s0tgPmIed95bJnuSqaD29HQNN8D3ElLSrsc~p
 - `to` - Ending slot number (inclusive)
 - `accept` - Content type specification (`application/aos-2`)
 
-> Note: The API returns `to` inclusively in practice. To avoid duplicate results when paginating, the next page should start from `to + 1`.
+> **Note:** Both `from` and `to` are inclusive. The API may return more than the requested range (e.g., requesting 100 slots may return 101 items). To avoid duplicate results when paginating, the next page should start from `to + 1`.
 
 **Response:**
 ```json

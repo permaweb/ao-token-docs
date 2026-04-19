@@ -84,7 +84,7 @@ async function getTransfers() {
                 if (hasNextPage && parsed.edges && parsed.edges.length > 0) {
                     /* Move to the next page range */
                     fromSlot = toSlot + 1;
-                    toSlot += PAGE_LIMIT;
+                    toSlot = fromSlot + PAGE_LIMIT;
                 }
             }
             else {
@@ -93,7 +93,7 @@ async function getTransfers() {
                 hasNextPage = toSlot < currentSlot;
                 if (hasNextPage) {
                     fromSlot = toSlot + 1;
-                    toSlot += PAGE_LIMIT;
+                    toSlot = fromSlot + PAGE_LIMIT;
                 }
             }
         }
