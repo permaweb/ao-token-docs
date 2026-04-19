@@ -85,6 +85,41 @@ Example
 https://state.forward.computer/0syT13r0s0tgPmIed95bJnuSqaD29HQNN8D3ElLSrsc~process@1.0/compute&slot=2460711/results?require-codec=application/json&accept-bundle=true
 ```
 
+The `raw` key in the response will contain messages indicating a success or failure with these tags:
+
+Success
+- `Debit-Notice` - Indicates sender's balance was debited
+- `Credit-Notice` - Indicates recipient's balance was credited
+
+Failure
+- `Transfer-Error` - Indicates transfer failed
+
+**Response:**
+```json
+{
+  "raw": {
+    "Messages": [
+      {
+        "Tags": [
+          {
+            "name": "Action",
+            "value": "Debit-Notice"
+          }
+        ]
+      },
+      {
+        "Tags": [
+          {
+            "name": "Action",
+            "value": "Credit-Notice"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 #### Ensuring Messages Are Permanently Stored on Arweave
 
 See [Messages on Arweave](./messages-on-arweave.md) for examples of ensuring AO messages are permanently stored on [Arweave](https://arweave.org).
