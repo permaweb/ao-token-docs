@@ -19,22 +19,22 @@ AO-Core is a protocol built to enable decentralized computations, offering a ser
 
 Verify that AO messages are permanently stored on Arweave by making HTTP requests to indexer nodes, confirming both data existence and location within the weave.
 
-[Read full documentation →](./markdown/messages-on-arweave.md)
+[Read full documentation →](./docs/messages-on-arweave.md)
 
 ## Monitor Token
 
 Monitor and validate AO token transfers by fetching scheduled messages, identifying Transfer actions, and verifying success through Credit and Debit notices in computation results.
 
-[Read full documentation →](./markdown/monitor-token.md)
+[Read full documentation →](./docs/monitor-token.md)
 
 ## Running A Node
 
 Set up and run an AO Mainnet (HyperBEAM) node with indexing capabilities, including prerequisites, configuration, and server setup instructions.
 
-[Read full documentation →](./markdown/running-a-node.md)
+[Read full documentation →](./docs/running-a-node.md)
 
 ## Token Integration
 
 Integrate with the AO Token by learning how to send transfers, read balances, verify transactions, and evaluate the token process on your own node.
 
-[Read full documentation →](./markdown/token-integration.md)
+[Read full documentation →](./docs/token-integration.md)
