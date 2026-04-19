@@ -9,6 +9,6 @@ AO-Core is a protocol built to enable decentralized computations, offering a ser
 ## Table of Contents
 
 - [Messages on Arweave](./markdown/messages-on-arweave.md)
+- [Monitor Token](./markdown/monitor-token.md)
 - [Running A Node](./markdown/running-a-node.md)
 - [Token Integration](./markdown/token-integration.md)
-- [Token Monitor](./markdown/token-monitor.md)
