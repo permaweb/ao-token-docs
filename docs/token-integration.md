@@ -107,7 +107,7 @@ curl "https://state.forward.computer/0syT13r0s0tgPmIed95bJnuSqaD29HQNN8D3ElLSrsc
 
 ## Token Evaluation
 
-Below is a list of requests to run to evaluate the AO token process on your node, once complete your node will be able to both read the schedule of the process and compute message results.
+Below is a list of requests to run to evaluate the AO token process on your node, once complete your node will be able to both read the schedule of the process and compute message results. See documentation for running your own node [here](./running-a-node.md).
 
 #### Evaluate the AO Token
 
