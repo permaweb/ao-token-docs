@@ -2,6 +2,14 @@
 
 This documentation outlines the neccessary steps for running an AO Mainnet([HyperBEAM](https://github.com/permaweb/HyperBEAM)) node.
 
+## Running HyperBEAM as a Docker container
+
+HyperBEAM can be deployed as a Docker container. See [this branch](https://github.com/permaweb/HyperBEAM/tree/feat/community-node/docs/community) for instructions. Indexing starts automatically unless explicitly disabled. Note the default port from the Dockerized variant is `8001`. 
+
+Alternatively, see below for instructions on building from source.
+
+## Building from source
+
 ### Prerequisites
 
 1. **Install Erlang/OTP 27**
