@@ -4,7 +4,7 @@ This documentation outlines the neccessary steps for integrating with the [AO](h
 
 There are two AO Mainnet URLs are referenced throughout this document for compute and indexing of the AO token process. To run your own node that can both evaluate and index the token, see [Running A Node](./running-a-node.md). Note while two different nodes are used here, both compute and indexing can run on the same node.
 
-The nodes used in this documentation are:
+The AO mainnet nodes used in this documentation are:
 
 - Compute: [https://state.forward.computer](https://state.forward.computer)
 - Indexer: [https://arweave.net](https://arweave.net)
