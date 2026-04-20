@@ -51,7 +51,7 @@ git clone https://github.com/permaweb/hyperbeam.git
 ### Run the HyperBEAM Server
 
 ```bash
-rebar3 as genesis_wasm shell
+HB_PARANOID=http_request rebar3 as genesis_wasm shell
 ```
 
 ### Run HyperBEAM as an indexer
@@ -111,7 +111,7 @@ Replace
 Use the same `run` command specified in the [Run the HyperBEAM Server](#run-the-hyperbeam-server) section with the configuration specified.
 
 ```bash
-HB_CONFIG=config.json rebar3 as genesis_wasm shell
+HB_PARANOID=http_request HB_CONFIG=config.json rebar3 as genesis_wasm shell
 ```
 
 3. Start indexing
