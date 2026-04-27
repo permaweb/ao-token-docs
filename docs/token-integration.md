@@ -148,7 +148,10 @@ Below is a list of requests to run to evaluate the AO token process on your node
 
 1. Import from a checkpoint
 
-> Checkpoint from March 24 2026: `mlcO-cm12-83azzPWHXKOzVAq3dFBWAYBsqXvQSKaI4`. Only messages from this date forward can be evaluated.
+> Below are two options for checkpoints at different dates, only messages from the checkpoint date forward can be evaluated.
+
+- March 24, 2026: `mlcO-cm12-83azzPWHXKOzVAq3dFBWAYBsqXvQSKaI4`
+- April 27, 2026: `ka2UYQunruPLX4LhC2RN9IiGXyYwce0Cg1u-iwDtSZU`
 
 > It is possible to evaluate the token from scratch (not using a checkpoint) however please note it could take multiple days to complete as there are over 2 million messages in the token schedule. To evalute the token from slot 0, skip to step 2.
 
