@@ -75,20 +75,82 @@ Create `config.json` in the HyperBEAM repository root
 ```json
 {
   "ao-types": "generate_index=atom,max_connections=integer,num_acceptors=integer",
+  "port": 8001,
   "num_acceptors": 32,
   "max_connections": 512,
-  "arweave_index_workers": 16,
-  "arweave_index_blocks": false,
+  "arweave_index_workers": 4,
+  "arweave_index_blocks": true,
   "routes": [
+    {
+      "template": "/result/.*",
+      "node": {
+        "prefix": "http://localhost:6363"
+      }
+    },
+    {
+      "template": "/snapshot/.*",
+      "node": {
+        "prefix": "http://localhost:6363"
+      }
+    },
+    {
+      "template": "/dry-run.*",
+      "node": {
+        "prefix": "http://localhost:6363"
+      }
+    },
+    {
+      "template": "/state.*",
+      "node": {
+        "prefix": "http://localhost:6363"
+      }
+    },
+    {
+      "template": "/graphql",
+      "nodes": [
+        {
+          "prefix": "https://ao-search-gateway.goldsky.com",
+          "opts": {
+            "ao-types": "http-client=atom,protocol=atom",
+            "http-client": "gun",
+            "protocol": "http2"
+          }
+        },
+        {
+          "prefix": "https://arweave-search.goldsky.com",
+          "opts": {
+            "ao-types": "http-client=atom,protocol=atom",
+            "http-client": "gun",
+            "protocol": "http2"
+          }
+        },
+        {
+          "prefix": "https://arweave.net",
+          "opts": {
+            "ao-types": "http-client=atom,protocol=atom",
+            "http-client": "gun",
+            "protocol": "http2"
+          }
+        }
+      ]
+    },
     {
       "template": "^/arweave",
       "node": {
         "match": "^/arweave",
-        "with": "ARWEAVE_NODE_ADDRESS"
+        "with": "https://arweave.net"
       }
     }
   ],
   "store": [
+    {
+      "ao-types": "store-module=atom",
+      "store-module": "hb_store_lmdb",
+      "name": "cache-mainnet/lmdb",
+      "access": ["read", "write"],
+      "max-readers": 512,
+      "capacity": 68719476736
+    },
     {
       "ao-types": "store-module=atom,scope=atom",
       "store-module": "hb_store_arweave",
@@ -98,7 +160,43 @@ Create `config.json` in the HyperBEAM repository root
         {
           "ao-types": "store-module=atom,read-only=atom",
           "store-module": "hb_store_lmdb",
-          "name": "ROLLING_LMDB_PATH",
+          "name": "cache-mainnet/lmdb",
+          "access": ["read", "write"],
+          "max-readers": 512,
+          "capacity": 68719476736
+        }
+      ]
+    },
+    {
+      "ao-types": "store-module=atom",
+      "store-module": "hb_store_gateway",
+      "access": ["read"],
+      "subindex": [
+        {
+          "name": "Data-Protocol",
+          "value": "ao"
+        }
+      ],
+      "local-store": [
+        {
+          "ao-types": "store-module=atom",
+          "store-module": "hb_store_lmdb",
+          "name": "cache-mainnet/lmdb",
+          "access": ["read", "write"],
+          "max-readers": 512,
+          "capacity": 68719476736
+        }
+      ]
+    },
+    {
+      "ao-types": "store-module=atom",
+      "store-module": "hb_store_gateway",
+      "access": ["read"],
+      "local-store": [
+        {
+          "ao-types": "store-module=atom",
+          "store-module": "hb_store_lmdb",
+          "name": "cache-mainnet/lmdb",
           "access": ["read", "write"],
           "max-readers": 512,
           "capacity": 68719476736
