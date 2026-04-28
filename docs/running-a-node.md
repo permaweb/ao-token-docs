@@ -207,11 +207,6 @@ Create `config.json` in the HyperBEAM repository root
 }
 ```
 
-Replace
-
-- `ARWEAVE_NODE_ADDRESS` with your Arweave node address
-- `ROLLING_LMDB_PATH` with an absolute path where index data will be stored (e.g. `/home/user/hyperbeam-data/rolling`)
-
 2. Run the server
 
 Use the same `run` command specified in the [Run the HyperBEAM Server](#run-the-hyperbeam-server) section with the configuration specified.
