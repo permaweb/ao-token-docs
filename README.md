@@ -12,6 +12,7 @@ AO-Core is a protocol built to enable decentralized computations, offering a ser
 - [Monitor Token](#monitor-token)
 - [Running A Node](#running-a-node)
 - [Token Integration](#token-integration)
+- [FAQs](#faqs)
 
 ---
 
@@ -38,3 +39,9 @@ Set up and run an AO Mainnet (HyperBEAM) node with indexing capabilities, includ
 Integrate with the AO Token by learning how to send transfers, read balances, verify transactions, and evaluate the token process on your own node.
 
 [Read full documentation →](./docs/token-integration.md)
+
+## FAQs
+
+Scoped AO Token integration FAQs for edge cases and operational questions not covered in the main docs.
+
+[Read integration FAQs →](./faqs/integration.md)
