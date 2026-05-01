@@ -27,6 +27,12 @@ curl -I "http://127.0.0.1:<PORT>/~arweave@2.9/raw=<TXID>"
 
 Use this distinction when debugging: if direct lookup works locally but raw lookup returns `404`, focus on local offset indexing rather than message existence.
 
+## How long can raw lookup lag direct lookup?
+
+Direct lookup by ID can become available immediately through the gateway path, while the raw offset route may take longer because it depends on offset index state. In exchange support testing, raw lookup commonly lagged by roughly 15-20 minutes.
+
+If `/<TXID>` works but `/~arweave@2.9/raw=<TXID>` returns `404`, do not treat that as proof the message is missing. Treat it as an offset-indexing delay or local-indexing issue until raw lookup catches up.
+
 ## How do I get the Arweave tip height from a HyperBEAM node?
 
 Use the `~arweave@2.9` status route and read the `height` response header/value:
