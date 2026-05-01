@@ -22,8 +22,27 @@ If no store path is configured, cache state is usually written under the HyperBE
 
 Be careful when deleting local state: if evaluation and indexing share the same LMDB path, deleting that path clears both token evaluation state and local Arweave indexing state.
 
-## Can I use a public Arweave peers for node indexing?
+## Why does checkpoint import return a 500 from a Dockerized node?
 
-Arweave does not have the same public RPC model as many account-based chains. Public gateways are useful for reads, but indexing flows often need access to an Arweave node that permits the required reads and can avoid gateway ratelimits.
+If a Docker image was built or started without the `genesis_wasm` profile, checkpoint import can fail even when the node otherwise appears healthy.
+
+Check the Docker build/start path for these forms:
+
+```bash
+rebar3 as genesis_wasm release
+rebar3 as genesis_wasm shell
+```
+
+Using plain `rebar3 release` or `rebar3 shell` can miss code needed by the token checkpoint import path.
+
+## Why does changing `/graphql` from `node` to `nodes` break startup?
+
+The `/graphql` route expects `nodes` to be an array of upstream prefixes. If config shape is wrong, the node may start incorrectly or fail when indexing.
+
+Use the shape from the current `running-a-node.md` config as the source of truth. If a custom config only includes a partial route/store set, HyperBEAM may miss defaults that the full config supplies.
+
+## Can I use a public Arweave gateway for node indexing?
+
+Arweave does not have the same public RPC model as many account-based chains. Public gateways are useful for reads, but indexing flows often need access to an Arweave node that permits the required reads and can avoid gateway rate limits.
 
 When setting up Arweave peers, `peers.arweave.xyz` can be used as the peer source.

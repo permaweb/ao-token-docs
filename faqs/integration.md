@@ -1,11 +1,13 @@
 # AO Token Integration FAQs
 
-These FAQs are scoped by the API surface or operational area they clarify. They are supplemental notes to help covering questions that may arise during the token integration process.
+These FAQs are scoped by the API surface or operational area they clarify. They are supplemental notes for questions that may arise during the token integration process.
 
 - [`~process@1.0` token process FAQs](./process@1.0.md)
 - [`~arweave@2.9` FAQs](./arweave@2.9.md)
 - [`~copycat@1.0` indexing FAQs](./copycat@1.0.md)
+- [Arweave GraphQL and external indexer FAQs](./graphql-indexers.md)
 - [HyperBEAM node operations FAQs](./hyperbeam-node.md)
+- [MU and bundler FAQs](./message-unit.md)
 - [`@permaweb/aoconnect` FAQs](./aoconnect.md)
 - [Explorer FAQs](./explorers.md)
 
