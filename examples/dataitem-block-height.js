@@ -1,10 +1,12 @@
 /**
  * Resolve bundled AO DataItem IDs to Arweave block heights.
  *
- * Efficient path:
+ * lookup path:
  * 1. HEAD {HB_NODE}/~arweave@2.9/raw=<DATAITEM_ID>
  *    - read the `offset` header
- * 2. Query an Arweave node's /block_index/<from>/<to> endpoint
+ * 2. HEAD {HB_NODE}/~arweave@2.9/status
+ *    - read the current Arweave `height` header
+ * 3. Binary search with HEAD {HB_NODE}/~arweave@2.9/block=<HEIGHT>
  *    - find the first block whose `weave_size` is greater than the offset
  *
  * Usage:
@@ -12,27 +14,20 @@
  *
  * Environment:
  *   HB_NODE=https://arweave.net
- *   ARWEAVE_NODES=http://tip-1.arweave.xyz:1984,http://tip-2.arweave.xyz:1984,http://tip-3.arweave.xyz:1984
- *   BLOCK_INDEX_PAGE_SIZE=10000
- *   REQUEST_TIMEOUT_MS=15000
+ *   REQUEST_TIMEOUT_MS=30000
+ *   REQUEST_RETRIES=2
  */
 
 const DATAITEM_IDS = process.argv.slice(2);
 
 const HB_NODE = stripTrailingSlash(process.env.HB_NODE || 'https://arweave.net');
-const ARWEAVE_NODES = (process.env.ARWEAVE_NODES ||
-    'http://tip-1.arweave.xyz:1984,http://tip-2.arweave.xyz:1984,http://tip-3.arweave.xyz:1984')
-    .split(',')
-    .map((node) => stripTrailingSlash(node.trim()))
-    .filter(Boolean);
-
-const BLOCK_INDEX_PAGE_SIZE = Math.min(
-    parsePositiveInteger(process.env.BLOCK_INDEX_PAGE_SIZE || '10000', 'BLOCK_INDEX_PAGE_SIZE'),
-    10000
-);
 const REQUEST_TIMEOUT_MS = parsePositiveInteger(
-    process.env.REQUEST_TIMEOUT_MS || '15000',
+    process.env.REQUEST_TIMEOUT_MS || '30000',
     'REQUEST_TIMEOUT_MS'
+);
+const REQUEST_RETRIES = parseNonNegativeInteger(
+    process.env.REQUEST_RETRIES || '2',
+    'REQUEST_RETRIES'
 );
 
 if (DATAITEM_IDS.length === 0 || DATAITEM_IDS.includes('--help')) {
@@ -50,7 +45,6 @@ async function main() {
         results.push({
             id,
             hyperbeamNode: HB_NODE,
-            arweaveNode: block.arweaveNode,
             offset: raw.offset.toString(),
             dataOffset: raw.dataOffset,
             headerLength: raw.headerLength,
@@ -92,150 +86,126 @@ async function getDataItemRawOffset(id) {
 }
 
 async function resolveBlockHeight(offset) {
-    const errors = [];
+    let low = 0;
+    let high = await getCurrentHeight();
 
-    for (const arweaveNode of ARWEAVE_NODES) {
-        try {
-            const blockIndex = new BlockIndexClient(arweaveNode);
-            return {
-                arweaveNode,
-                ...(await blockIndex.heightForOffset(offset))
-            };
+    while (low < high) {
+        const middle = Math.floor((low + high) / 2);
+        const weaveSize = await getBlockWeaveSize(middle);
+
+        if (weaveSize > offset) {
+            high = middle;
         }
-        catch (error) {
-            errors.push(`${arweaveNode}: ${error.message}`);
+        else {
+            low = middle + 1;
         }
     }
 
-    throw new Error(`All Arweave nodes failed:\n${errors.join('\n')}`);
+    const block = await getBlockHeader(low);
+    const blockEndOffset = BigInt(block.weaveSize);
+
+    if (blockEndOffset <= offset) {
+        throw new Error(`Offset ${offset} is beyond indexed weave size ${blockEndOffset}`);
+    }
+
+    const previousWeaveSize = low === 0 ? 0n : await getBlockWeaveSize(low - 1);
+
+    return {
+        height: low,
+        hash: block.indepHash,
+        txRoot: block.txRoot,
+        blockStartOffset: previousWeaveSize,
+        blockEndOffset
+    };
 }
 
-class BlockIndexClient {
-    constructor(arweaveNode) {
-        this.arweaveNode = arweaveNode;
-        this.entries = new Map();
-        this.loadedPages = new Set();
-        this.tipHeight = null;
+async function getCurrentHeight() {
+    const url = `${HB_NODE}/~arweave@2.9/status`;
+    const response = await fetchWithTimeout(url, {
+        method: 'HEAD'
+    });
+
+    if (!response.ok) {
+        throw new Error(`HyperBEAM status lookup failed: HTTP ${response.status}`);
     }
 
-    async heightForOffset(offset) {
-        let low = 0;
-        let high = await this.currentHeight();
-
-        while (low < high) {
-            const middle = Math.floor((low + high) / 2);
-            const weaveSize = await this.weaveSizeAt(middle);
-
-            if (weaveSize > offset) {
-                high = middle;
-            }
-            else {
-                low = middle + 1;
-            }
-        }
-
-        const entry = await this.blockIndexEntry(low);
-        const previousWeaveSize = low === 0 ? 0n : await this.weaveSizeAt(low - 1);
-
-        return {
-            height: low,
-            hash: entry.hash,
-            txRoot: entry.tx_root,
-            blockStartOffset: previousWeaveSize,
-            blockEndOffset: BigInt(entry.weave_size)
-        };
+    const height = response.headers.get('height');
+    if (!height) {
+        throw new Error('HyperBEAM status lookup returned no height header');
     }
 
-    async currentHeight() {
-        if (this.tipHeight !== null) {
-            return this.tipHeight;
-        }
+    return Number(height);
+}
 
-        const response = await fetchWithTimeout(`${this.arweaveNode}/height`);
+const blockHeaderCache = new Map();
 
-        if (!response.ok) {
-            throw new Error(`/height failed: HTTP ${response.status}`);
-        }
+async function getBlockWeaveSize(height) {
+    const block = await getBlockHeader(height);
+    return BigInt(block.weaveSize);
+}
 
-        this.tipHeight = Number((await response.text()).trim());
-        return this.tipHeight;
+async function getBlockHeader(height) {
+    if (blockHeaderCache.has(height)) {
+        return blockHeaderCache.get(height);
     }
 
-    async weaveSizeAt(height) {
-        const entry = await this.blockIndexEntry(height);
-        return BigInt(entry.weave_size);
+    const url = `${HB_NODE}/~arweave@2.9/block=${height}`;
+    const response = await fetchWithTimeout(url, {
+        method: 'HEAD'
+    });
+
+    if (response.status === 404) {
+        throw new Error(`HyperBEAM block ${height} is not indexed`);
+    }
+    if (!response.ok) {
+        throw new Error(`HyperBEAM block ${height} lookup failed: HTTP ${response.status}`);
     }
 
-    async blockIndexEntry(height) {
-        if (this.entries.has(height)) {
-            return this.entries.get(height);
-        }
-
-        await this.loadPageForHeight(height);
-
-        if (!this.entries.has(height)) {
-            throw new Error(`No block index entry loaded for height ${height}`);
-        }
-
-        return this.entries.get(height);
+    const weaveSize = response.headers.get('weave_size');
+    if (!weaveSize) {
+        throw new Error(`HyperBEAM block ${height} returned no weave_size header`);
     }
 
-    async loadPageForHeight(height) {
-        const tipHeight = await this.currentHeight();
+    const block = {
+        height,
+        weaveSize,
+        indepHash: response.headers.get('indep_hash'),
+        txRoot: response.headers.get('tx_root')
+    };
 
-        if (height < 0 || height > tipHeight) {
-            throw new Error(`Height ${height} is outside node range 0..${tipHeight}`);
-        }
-
-        const start = Math.floor(height / BLOCK_INDEX_PAGE_SIZE) * BLOCK_INDEX_PAGE_SIZE;
-        const end = Math.min(start + BLOCK_INDEX_PAGE_SIZE - 1, tipHeight);
-        const pageKey = `${start}-${end}`;
-
-        if (this.loadedPages.has(pageKey)) {
-            return;
-        }
-
-        const url = `${this.arweaveNode}/block_index/${start}/${end}`;
-        const response = await fetchWithTimeout(url, {
-            headers: {
-                // Without this, Arweave nodes may return only block hashes.
-                'x-block-format': '1'
-            }
-        });
-
-        if (!response.ok) {
-            const body = await response.text();
-            throw new Error(`/block_index/${start}/${end} failed: HTTP ${response.status} ${body.slice(0, 200)}`);
-        }
-
-        const entries = await response.json();
-
-        entries.forEach((entry, index) => {
-            const entryHeight = end - index;
-
-            if (!entry || !entry.weave_size) {
-                throw new Error(`Invalid block index entry at height ${entryHeight}`);
-            }
-
-            this.entries.set(entryHeight, entry);
-        });
-
-        this.loadedPages.add(pageKey);
-    }
+    blockHeaderCache.set(height, block);
+    return block;
 }
 
 async function fetchWithTimeout(url, options = {}) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const method = options.method || 'GET';
 
-    try {
-        return await fetch(url, {
-            ...options,
-            signal: controller.signal
-        });
-    }
-    finally {
-        clearTimeout(timeout);
+    for (let attempt = 1; attempt <= REQUEST_RETRIES + 1; attempt++) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+            return response;
+        }
+        catch (error) {
+            const isLastAttempt = attempt > REQUEST_RETRIES;
+            const message = error.name === 'AbortError'
+                ? `${method} ${url} timed out after ${REQUEST_TIMEOUT_MS}ms`
+                : `${method} ${url} failed: ${error.message}`;
+
+            if (isLastAttempt) {
+                throw new Error(message);
+            }
+
+            await sleep(500 * attempt);
+        }
+        finally {
+            clearTimeout(timeout);
+        }
     }
 }
 
@@ -251,6 +221,20 @@ function parsePositiveInteger(value, name) {
     }
 
     return parsed;
+}
+
+function parseNonNegativeInteger(value, name) {
+    const parsed = Number(value);
+
+    if (!Number.isInteger(parsed) || parsed < 0) {
+        throw new Error(`${name} must be a non-negative integer`);
+    }
+
+    return parsed;
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 main().catch((error) => {
