@@ -71,3 +71,28 @@ Use the `~arweave@2.9` status route and read the `height` response header/value:
 ```bash
 curl -I "http://127.0.0.1:<PORT>/~arweave@2.9/status"
 ```
+
+## How can I get a DataItem block height using my HyperBEAM node?
+
+Use the example script from this repository and point `HB_NODE` at your HyperBEAM node:
+
+```bash
+HB_NODE="http://127.0.0.1:<PORT>" node examples/dataitem-block-height.js <DATAITEM_ID>
+```
+
+The script resolves the Arweave L1 block containing the DataItem bytes by:
+
+1. Calling `HEAD <HB_NODE>/~arweave@2.9/raw=<DATAITEM_ID>` and reading the `offset` header.
+2. Calling `HEAD <HB_NODE>/~arweave@2.9/status` to get the current Arweave height.
+3. Binary searching `HEAD <HB_NODE>/~arweave@2.9/block=<HEIGHT>` and matching the offset against each block's `weave_size`.
+
+The same method can be used for a parent bundle transaction ID if `~arweave@2.9/raw=<ID>` returns an offset for it.
+
+> For production integrations, run this against your own HyperBEAM node instead of relying on public shared infrastructure (gateway) - a local HB node gives you control over local index scope or retention.
+
+This lookup depends on local index state. `copycat` indexes Arweave block ranges and, when ID indexing is enabled, writes local offset entries for L1 transactions and bundled ANS-104 DataItems. It also causes the block metadata used by `~arweave@2.9/block=<HEIGHT>` to be cached locally. If the script returns a `404` from the raw route, first make sure `copycat` has processed the block containing the parent bundle:
+
+```bash
+curl -s "http://127.0.0.1:<PORT>/~copycat@1.0/arweave&from=<BUNDLE_BLOCK_HEIGHT>&to=<BUNDLE_BLOCK_HEIGHT>&mode=list"
+curl -I "http://127.0.0.1:<PORT>/~arweave@2.9/raw=<DATAITEM_ID>"
+```
