@@ -33,6 +33,14 @@ Direct lookup by ID can become available immediately through the gateway path, w
 
 If `/<TXID>` works but `/~arweave@2.9/raw=<TXID>` returns `404`, do not treat that as proof the message is missing. Treat it as an offset-indexing delay or local-indexing issue until raw lookup catches up.
 
+## Why does local raw lookup require indexing the Arweave block?
+
+`~arweave@2.9/raw=<TXID>` is a raw Arweave DataItem lookup backed by the local Arweave offset index. For a local node to answer it, the Arweave block containing the parent bundle must be indexed locally, and the child DataItem offset must be written.
+
+This is separate from AO Token evaluation. A node can have the token process evaluated up to the latest AO slot and still return `404` for local raw lookup if the Arweave block containing that DataItem has not been indexed locally.
+
+Use the DataItem block-height script to identify the containing Arweave block, then index that block directly if needed.
+
 ## How do I diagnose local direct lookup returning 200 while local raw lookup returns 404?
 
 Start by checking whether the local node indexed the Arweave block that contains the parent bundle for the DataItem. `copycat` indexes Arweave blocks, and `mode=list` lists the L1 transaction IDs indexed for that block range.

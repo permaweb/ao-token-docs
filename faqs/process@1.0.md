@@ -12,7 +12,7 @@ If a scanner appears to skip slots, it is usually because the scanner is filteri
 
 Once a message has an assigned slot from the authoritative scheduler and that slot has a computable transfer result, the transfer should be treated as final for AO accounting. It will not be reassigned to a different slot or rolled back by an Arweave-style reorg.
 
-As an operational margin, an high-value clients (e.g. CEXs) can wait for `N+1` or `N+2` scheduler slots after the transfer's slot before crediting. That delay is mainly for stale reads and result propagation, not because AO has chain-style reorgs at the scheduler layer.
+As an operational margin, high-value clients (e.g. CEXs) can wait for `N+1` or `N+2` scheduler slots after the transfer's slot before crediting. That delay is mainly for stale reads and result propagation, not because AO has chain-style reorgs at the scheduler layer.
 
 ## Do Arweave confirmations determine AO transfer finality?
 
@@ -20,11 +20,25 @@ No. AO execution finality is driven by the scheduler/process/compute lifecycle. 
 
 If an integration is still relying on Arweave block-height based indexing during a migration, waiting for additional Arweave confirmations can reduce exposure to external indexer and bundler reseeding effects. Slot-based processing should be treated as the canonical integration path.
 
+## Does token evaluation depend on Arweave block indexing?
+
+No. Token evaluation and Arweave indexing are separate local-node responsibilities.
+
+The token evaluation cron keeps the AO Token process computed up to date:
+
+```bash
+curl "http://localhost:<PORT>/~cron@1.0/every?interval=5-seconds&cron-path=0syT13r0s0tgPmIed95bJnuSqaD29HQNN8D3ElLSrsc~process@1.0/now"
+```
+
+Run it again after every HyperBEAM restart. If it is not running, `compute/at-slot` can fall behind the scheduler and balance/result reads from that node may be stale.
+
+This does not index Arweave blocks for local raw DataItem lookup. The `copycat` Arweave indexing cron is what keeps local `~arweave@2.9/raw=<TXID>` coverage up to date.
+
 ## Do I need to validate the assignment `Hash-Chain` field myself?
 
 Normally, no. Hash-chain validation is handled by the scheduler and compute unit path. Integrations should verify that the message is assigned by the expected scheduler, has the expected token process target, and has a computable transfer result.
 
-## what are `Transfer-Error` results?
+## What are `Transfer-Error` results?
 
 `Transfer-Error` is emitted by the token process when a transfer is invalid, such as an insufficient-balance transfer. In normal wallet flows, failed transfers are uncommon because wallets usually prevent users from submitting transfers they cannot fund.
 
