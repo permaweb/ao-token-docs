@@ -156,7 +156,7 @@ Below is a list of requests to run to evaluate the AO token process on your node
 > It is possible to evaluate the token from scratch (not using a checkpoint) however please note it could take multiple days to complete as there are over 2 million messages in the token schedule. To evalute the token from slot 0, skip to step 2.
 
 ```bash
-curl "http://localhost:8734/~genesis-wasm@1.0/import=mlcO-cm12-83azzPWHXKOzVAq3dFBWAYBsqXvQSKaI4?process-id=0syT13r0s0tgPmIed95bJnuSqaD29HQNN8D3ElLSrsc"
+curl "http://localhost:8734/~genesis-wasm@1.0/import=ka2UYQunruPLX4LhC2RN9IiGXyYwce0Cg1u-iwDtSZU?process-id=0syT13r0s0tgPmIed95bJnuSqaD29HQNN8D3ElLSrsc"
 ```
 
 2. Start evaluating the process
