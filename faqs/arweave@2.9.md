@@ -33,6 +33,14 @@ Direct lookup by ID can become available immediately through the gateway path, w
 
 If `/<TXID>` works but `/~arweave@2.9/raw=<TXID>` returns `404`, do not treat that as proof the message is missing. Treat it as an offset-indexing delay or local-indexing issue until raw lookup catches up.
 
+## Why does local raw lookup require indexing the Arweave block?
+
+`~arweave@2.9/raw=<TXID>` is a raw Arweave DataItem lookup backed by the local Arweave offset index. For a local node to answer it, the Arweave block containing the parent bundle must be indexed locally, and the child DataItem offset must be written.
+
+This is separate from AO Token evaluation. A node can have the token process evaluated up to the latest AO slot and still return `404` for local raw lookup if the Arweave block containing that DataItem has not been indexed locally.
+
+Use the DataItem block-height script to identify the containing Arweave block, then index that block directly if needed.
+
 ## How do I diagnose local direct lookup returning 200 while local raw lookup returns 404?
 
 Start by checking whether the local node indexed the Arweave block that contains the parent bundle for the DataItem. `copycat` indexes Arweave blocks, and `mode=list` lists the L1 transaction IDs indexed for that block range.
@@ -71,6 +79,16 @@ Use the `~arweave@2.9` status route and read the `height` response header/value:
 ```bash
 curl -I "http://127.0.0.1:<PORT>/~arweave@2.9/status"
 ```
+
+Use `height` as the Arweave network height. Other block-related fields are node-local metadata:
+
+- `height`: the current Arweave main-chain height reported by the node.
+- `blocks`: count of main-chain blocks cached in the requested node.
+- `cached_blocks`: count of all cached blocks, including reorged or orphaned blocks.
+
+`blocks` and `cached_blocks` can be much lower than `height`, depending on how the node is configured and how much history it has indexed. `cached_blocks` can also be greater than `blocks` because it includes non-main-chain cached blocks.
+
+Do not use `blocks` or `cached_blocks` as the Arweave network height. To inspect whether a local node indexed a specific range, use `copycat` `mode=list` for that range.
 
 ## How can I get a DataItem block height using my HyperBEAM node?
 
