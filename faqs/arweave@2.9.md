@@ -80,6 +80,16 @@ Use the `~arweave@2.9` status route and read the `height` response header/value:
 curl -I "http://127.0.0.1:<PORT>/~arweave@2.9/status"
 ```
 
+Use `height` as the Arweave network height. Other block-related fields are node-local metadata:
+
+- `height`: the current Arweave main-chain height reported by the node.
+- `blocks`: count of main-chain blocks cached in the requested node.
+- `cached_blocks`: count of all cached blocks, including reorged or orphaned blocks.
+
+`blocks` and `cached_blocks` can be much lower than `height`, depending on how the node is configured and how much history it has indexed. `cached_blocks` can also be greater than `blocks` because it includes non-main-chain cached blocks.
+
+Do not use `blocks` or `cached_blocks` as the Arweave network height. To inspect whether a local node indexed a specific range, use `copycat` `mode=list` for that range.
+
 ## How can I get a DataItem block height using my HyperBEAM node?
 
 Use the example script from this repository and point `HB_NODE` at your HyperBEAM node:
