@@ -49,6 +49,27 @@ Each run can overwrite cached data for the covered recent blocks. This is intent
 
 If the parent bundle was indexed correctly, the child DataItem's offset should still become available through the `~arweave@2.9` raw lookup.
 
+The range is descending: `from` must be the higher block height and `to` must be the lower block height. If `from < to`, `mode=list` returns an empty object.
+
+Example:
+
+```bash
+# Correct: inspect from newer block down to older block
+curl -s "http://127.0.0.1:<PORT>/~copycat@1.0/arweave&from=1913308&to=1906955&mode=list"
+
+# Incorrect: this returns {}
+curl -s "http://127.0.0.1:<PORT>/~copycat@1.0/arweave&from=1906955&to=1913308&mode=list"
+```
+
+To get the newest locally indexed block in a range:
+
+```bash
+curl -s "http://127.0.0.1:<PORT>/~copycat@1.0/arweave&from=<HIGH_HEIGHT>&to=<LOW_HEIGHT>&mode=list" \
+  | jq 'keys | map(tonumber) | max'
+```
+
+That value is the highest block in the requested range with at least one locally indexed transaction. It is not a global indexed-height watermark.
+
 ## Why can a block be listed but the DataItem still return 404?
 
 That usually means block-level indexing has reached the block, but the local offset entry for the child DataItem was not written or is not being read from the expected local index store. Check whether the HyperBEAM process is using the config and LMDB path you think it is using.
