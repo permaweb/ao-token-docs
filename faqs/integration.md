@@ -3,6 +3,7 @@
 These FAQs are scoped by the API surface or operational area they clarify. They are supplemental notes for questions that may arise during the token integration process.
 
 - [`~process@1.0` token process FAQs](./process@1.0.md)
+- [AO Token balance FAQs](./balances.md)
 - [`~arweave@2.9` FAQs](./arweave@2.9.md)
 - [`~copycat@1.0` indexing FAQs](./copycat@1.0.md)
 - [Arweave GraphQL and external indexer FAQs](./graphql-indexers.md)
