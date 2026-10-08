@@ -1,5 +1,7 @@
 # AO Token Docs
 
+> (!) as of October 9th 2026, Goldsky GQL endpoints will be rate limited, if they are used anywhere in your stack, please switch to arweave.net/graphql
+
 Documentation for interacting with the [AO](https://ao.arweave.net) Token.
 
 AO is a decentralized compute system where countless parallel processes interact within a single, cohesive environment. Built on the AO-Core protocol, it uses the actor model inspired by Erlang - each process operates independently yet connects through native message-passing, creating a web of autonomous computation.
