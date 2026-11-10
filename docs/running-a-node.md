@@ -66,6 +66,8 @@ HB_PARANOID=http_request rebar3 as genesis_wasm shell
 
 Set up a HyperBEAM node that indexes and serves Arweave data through your own Arweave node.
 
+> **Compatibility notice for `v0.9-FINAL` nodes:** The newer gateway behind `arweave.net` can reject v0.9-era Arweave `/chunk` requests. Upgrade to [HyperBEAM `v0.9.1`](https://github.com/permaweb/HyperBEAM/releases/tag/v0.9.1), then replace the `with` value of the `^/arweave` route below with a compatible upstream URL provided by the team on request. Keep the same LMDB path and working directory if the path is relative; no store rebuild is needed. Restart the rolling Copycat cron after restarting HyperBEAM.
+
 > Documentation for running an Arweave node can be found [here](https://docs.arweave.org/developers).
 
 1. Add configuration
